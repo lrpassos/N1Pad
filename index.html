@@ -3,6 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Garante que window.fetch suporte atribuição segura caso scripts externos ou extensões tentem sobrescrevê-lo
+      (function() {
+        try {
+          var _rawFetch = window.fetch;
+          var _currentFetch = function() {
+            return _rawFetch.apply(this === window || !this ? window : this, arguments);
+          };
+
+          var descriptor = {
+            configurable: true,
+            enumerable: true,
+            get: function() {
+              return _currentFetch;
+            },
+            set: function(newFetch) {
+              if (typeof newFetch === 'function') {
+                _currentFetch = newFetch;
+              }
+            }
+          };
+
+          try {
+            Object.defineProperty(window, 'fetch', descriptor);
+          } catch (e) {}
+
+          if (typeof Window !== 'undefined' && Window.prototype) {
+            try {
+              Object.defineProperty(Window.prototype, 'fetch', descriptor);
+            } catch (e) {}
+          }
+        } catch (err) {
+          // Fallback silencioso
+        }
+      })();
+    </script>
     <title>The N1Pad — Bloco de Notas Visual</title>
     <meta name="description" content="Bloco de notas visual moderno e minimalista com suporte a anotações em imagens e autenticação de usuários." />
     <meta property="og:title" content="The N1Pad — Bloco de Notas Visual" />
