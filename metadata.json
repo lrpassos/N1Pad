@@ -1,0 +1,6 @@
+{
+  "name": "The N1Pad",
+  "description": "Bloco de notas visual moderno e minimalista com suporte a anotações em imagens (setas, retângulos, marcações) e autenticação de usuários.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
