@@ -16,8 +16,28 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+  const content = (
+    <html lang="pt-BR" className="dark">
+      <body className="bg-[#090d16] text-slate-100 antialiased min-h-screen selection:bg-cyan-500/30 selection:text-cyan-200">
+        {!publishableKey && (
+          <div className="bg-gradient-to-r from-violet-900/60 via-indigo-900/40 to-cyan-900/60 border-b border-violet-500/30 px-4 py-2 text-center text-xs text-violet-200 flex items-center justify-center gap-2">
+            <span>🔑 Dica Vercel: Adicione <code className="bg-slate-900/80 px-1.5 py-0.5 rounded text-cyan-300 font-mono">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> e <code className="bg-slate-900/80 px-1.5 py-0.5 rounded text-cyan-300 font-mono">CLERK_SECRET_KEY</code> nas Environment Variables da Vercel.</span>
+          </div>
+        )}
+        {children}
+      </body>
+    </html>
+  );
+
+  if (!publishableKey) {
+    return content;
+  }
+
   return (
     <ClerkProvider
+      publishableKey={publishableKey}
       appearance={{
         baseTheme: dark,
         variables: {
@@ -32,11 +52,7 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="pt-BR" className="dark">
-        <body className="bg-[#090d16] text-slate-100 antialiased min-h-screen selection:bg-cyan-500/30 selection:text-cyan-200">
-          {children}
-        </body>
-      </html>
+      {content}
     </ClerkProvider>
   );
 }
