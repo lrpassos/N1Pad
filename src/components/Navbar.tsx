@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Plus,
   PanelLeft,
@@ -6,12 +6,9 @@ import {
   Download,
   Upload,
   User as UserIcon,
-  LogOut,
-  ShieldCheck,
-  Check,
-  ChevronDown,
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { UserNav } from './UserNav';
 
 interface NavbarProps {
   sidebarOpen: boolean;
@@ -122,82 +119,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <div className="h-5 w-[1px] bg-slate-800 mx-1" />
 
-        {/* Clerk Auth / User Button Section */}
+        {/* OAuth / User Button Section */}
         {user ? (
-          <div className="relative">
-            <button
-              id="btn-user-profile"
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full bg-slate-900 border border-slate-800 hover:border-violet-500/40 transition-colors"
-            >
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                referrerPolicy="no-referrer"
-                className="w-6 h-6 rounded-full object-cover ring-1 ring-violet-500/40"
-              />
-              <span className="text-xs font-medium text-slate-200 max-w-[100px] truncate hidden sm:inline">
-                {user.name.split(' ')[0]}
-              </span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
-            </button>
-
-            {/* Profile Dropdown Popover */}
-            {profileOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setProfileOpen(false)}
-                />
-                <div
-                  id="user-profile-menu"
-                  className="absolute right-0 mt-2 w-64 rounded-2xl bg-slate-900/95 border border-slate-800 shadow-2xl p-3 z-40 text-xs animate-in zoom-in-95 duration-100 backdrop-blur-lg"
-                >
-                  <div className="flex items-center gap-3 p-2 border-b border-slate-800 pb-3">
-                    <img
-                      src={user.avatarUrl}
-                      alt={user.name}
-                      referrerPolicy="no-referrer"
-                      className="w-10 h-10 rounded-full ring-2 ring-violet-500/40"
-                    />
-                    <div className="overflow-hidden">
-                      <p className="font-semibold text-white truncate">{user.name}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
-                    </div>
-                  </div>
-
-                  <div className="py-2 flex flex-col gap-1">
-                    <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-300 bg-slate-800/40 text-[11px]">
-                      <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Clerk Auth Ativo</span>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setProfileOpen(false);
-                        onOpenAuthModal();
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 text-left transition-colors"
-                    >
-                      <UserIcon className="w-3.5 h-3.5 text-violet-400" />
-                      <span>Alternar / Configurar Conta</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setProfileOpen(false);
-                        onSignOut();
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 text-left transition-colors"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>Sair da Conta</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <UserNav
+            user={user}
+            onSignOut={onSignOut}
+            onOpenAuthModal={onOpenAuthModal}
+          />
         ) : (
           <button
             id="btn-login-trigger"
@@ -205,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-lg transition-colors"
           >
             <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Entrar</span>
+            <span>Entrar com Google / Microsoft</span>
           </button>
         )}
       </div>

@@ -7,33 +7,55 @@ import {
   ShieldCheck,
   Sparkles,
   KeyRound,
-  ExternalLink,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
-interface ClerkAuthModalProps {
+interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: UserProfile | null;
   onLogin: (user: UserProfile) => void;
 }
 
-export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
+export const ClerkAuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   currentUser,
   onLogin,
 }) => {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'microsoft' | null>(null);
+  const [showConfigHelp, setShowConfigHelp] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [showConfigHelp, setShowConfigHelp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleDemoSignIn = (demoUser: UserProfile) => {
-    onLogin(demoUser);
-    onClose();
+  const handleOAuthLogin = (provider: 'google' | 'microsoft') => {
+    setLoadingProvider(provider);
+    setTimeout(() => {
+      if (provider === 'google') {
+        onLogin({
+          id: 'usr_google_luiz',
+          name: 'Luiz Rogério',
+          email: 'luiz.rogerios@gmail.com',
+          avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Luiz',
+          isGuest: false,
+        });
+      } else {
+        onLogin({
+          id: 'usr_ms_corporate',
+          name: 'Luiz Rogério (Microsoft 365)',
+          email: 'luiz.rogerios@outlook.com',
+          avatarUrl: 'https://api.dicebear.com/7.x/initials/svg?seed=LR',
+          isGuest: false,
+        });
+      }
+      setLoadingProvider(null);
+      onClose();
+    }, 600);
   };
 
   const handleCustomSubmit = (e: React.FormEvent) => {
@@ -53,12 +75,10 @@ export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
 
   return (
     <div
-      id="clerk-auth-modal"
+      id="oauth-auth-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
     >
-      <div
-        className="relative w-full max-w-md rounded-3xl bg-[#0b0f19] border border-slate-800/90 shadow-2xl p-6 sm:p-8 text-slate-100 overflow-hidden"
-      >
+      <div className="relative w-full max-w-md rounded-3xl bg-[#0b0f19] border border-slate-800/90 shadow-2xl p-6 sm:p-8 text-slate-100 overflow-hidden">
         {/* Ambient background glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full bg-cyan-600/20 blur-3xl pointer-events-none" />
@@ -71,86 +91,89 @@ export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
           <X className="w-4 h-4" />
         </button>
 
-        {/* Clerk Header */}
+        {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-500 to-cyan-400 mb-3 shadow-lg shadow-violet-500/25">
-            <Lock className="w-6 h-6 text-white" />
+            <span className="font-black text-white text-base tracking-tight">N1</span>
           </div>
           <h3 className="text-xl font-bold tracking-tight text-white">
-            {isSignUp ? 'Criar conta no The N1Pad' : 'Entrar no The N1Pad'}
+            The N1Pad — Autenticação OAuth
           </h3>
           <p className="text-xs text-slate-400 mt-1">
-            Autenticação segura e sincronizada com{' '}
-            <span className="text-violet-400 font-semibold">Clerk Auth</span>
+            Entre de forma segura com sua conta Google ou Microsoft
           </p>
         </div>
 
-        {/* Quick 1-click Demo Accounts */}
-        <div className="space-y-2 mb-6">
+        {/* OAuth Buttons (Google & Microsoft) */}
+        <div className="space-y-3 mb-6">
+          {/* Botão 1: Google OAuth */}
           <button
-            onClick={() =>
-              handleDemoSignIn({
-                id: 'usr_rogerio',
-                name: 'Luiz Rogério',
-                email: 'luiz.rogerios@gmail.com',
-                avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Luiz',
-              })
-            }
-            className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-violet-500/50 transition-all group"
+            type="button"
+            disabled={loadingProvider !== null}
+            onClick={() => handleOAuthLogin('google')}
+            className="w-full h-12 px-4 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/80 hover:border-slate-600 text-slate-200 hover:text-white font-medium text-xs flex items-center justify-center gap-3 transition-all duration-150 shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:pointer-events-none group"
           >
-            <div className="flex items-center gap-3">
-              <img
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luiz"
-                alt="Luiz Rogério"
-                className="w-8 h-8 rounded-full ring-1 ring-violet-500/40"
-              />
-              <div className="text-left">
-                <p className="text-xs font-semibold text-slate-200 group-hover:text-white">
-                  Continuar como Luiz Rogério
-                </p>
-                <p className="text-[10px] text-slate-500">luiz.rogerios@gmail.com</p>
-              </div>
-            </div>
-            <Sparkles className="w-4 h-4 text-cyan-400 opacity-70 group-hover:opacity-100" />
+            {loadingProvider === 'google' ? (
+              <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+            ) : (
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.27A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.57.38-2.27V6.58H1.24A11.98 11.98 0 0 0 0 12c0 1.92.45 3.74 1.24 5.42l4.04-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                />
+              </svg>
+            )}
+            <span>
+              {loadingProvider === 'google' ? 'Conectando ao Google...' : 'Continuar com Google'}
+            </span>
           </button>
 
+          {/* Botão 2: Microsoft OAuth */}
           <button
-            onClick={() =>
-              handleDemoSignIn({
-                id: 'usr_guest_demo',
-                name: 'Dev Explorer',
-                email: 'developer@n1pad.app',
-                avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=Explorer',
-              })
-            }
-            className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-900/50 hover:bg-slate-800/70 border border-slate-800/60 hover:border-cyan-500/40 transition-all group text-left"
+            type="button"
+            disabled={loadingProvider !== null}
+            onClick={() => handleOAuthLogin('microsoft')}
+            className="w-full h-12 px-4 rounded-xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/80 hover:border-slate-600 text-slate-200 hover:text-white font-medium text-xs flex items-center justify-center gap-3 transition-all duration-150 shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:pointer-events-none group"
           >
-            <div className="flex items-center gap-3">
-              <img
-                src="https://api.dicebear.com/7.x/bottts/svg?seed=Explorer"
-                alt="Dev Explorer"
-                className="w-8 h-8 rounded-full ring-1 ring-cyan-500/40"
-              />
-              <div>
-                <p className="text-xs font-semibold text-slate-300 group-hover:text-white">
-                  Entrar como Visitante / Dev
-                </p>
-                <p className="text-[10px] text-slate-500">developer@n1pad.app</p>
-              </div>
-            </div>
-            <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
+            {loadingProvider === 'microsoft' ? (
+              <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+            ) : (
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 23 23">
+                <path fill="#f35325" d="M1 1h10v10H1z" />
+                <path fill="#81bc06" d="M12 1h10v10H12z" />
+                <path fill="#05a6f0" d="M1 12h10v10H1z" />
+                <path fill="#ffba08" d="M12 12h10v10H12z" />
+              </svg>
+            )}
+            <span>
+              {loadingProvider === 'microsoft'
+                ? 'Conectando à Microsoft...'
+                : 'Continuar com Microsoft'}
+            </span>
           </button>
         </div>
 
         {/* Divider */}
         <div className="relative flex items-center justify-center my-4">
           <div className="border-t border-slate-800 w-full" />
-          <span className="bg-[#0b0f19] px-3 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
-            ou com e-mail
+          <span className="bg-[#0b0f19] px-3 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+            ou com e-mail corporativo
           </span>
         </div>
 
-        {/* Email form */}
+        {/* Form alternativo */}
         <form onSubmit={handleCustomSubmit} className="space-y-3">
           {isSignUp && (
             <div>
@@ -159,7 +182,7 @@ export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Ana Silva"
+                placeholder="Ex: Luiz Rogério"
                 className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-violet-500 placeholder:text-slate-600"
               />
             </div>
@@ -174,7 +197,7 @@ export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu.email@exemplo.com"
+                placeholder="seu.email@empresa.com"
                 className="w-full pl-9 pr-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-cyan-500 placeholder:text-slate-600"
               />
             </div>
@@ -189,18 +212,17 @@ export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
           </button>
         </form>
 
-        {/* Toggle Sign in / Sign up */}
         <div className="mt-4 text-center">
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
             className="text-xs text-slate-400 hover:text-cyan-400 transition-colors"
           >
-            {isSignUp ? 'Já tem uma conta? Entrar' : 'Não tem uma conta? Cadastre-se'}
+            {isSignUp ? 'Já tem uma conta? Entrar' : 'Novo por aqui? Criar conta rápida'}
           </button>
         </div>
 
-        {/* Clerk Instructions drawer */}
+        {/* Auth.js Config Drawer */}
         <div className="mt-6 pt-4 border-t border-slate-800/80">
           <button
             type="button"
@@ -209,7 +231,7 @@ export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
           >
             <span className="flex items-center gap-1.5">
               <KeyRound className="w-3.5 h-3.5 text-violet-400" />
-              Instruções Clerk Auth no Next.js
+              Credenciais Auth.js v5 no .env.local
             </span>
             <span className="text-[10px] text-cyan-400">{showConfigHelp ? 'Ocultar' : 'Ver'}</span>
           </button>
@@ -217,10 +239,10 @@ export const ClerkAuthModal: React.FC<ClerkAuthModalProps> = ({
           {showConfigHelp && (
             <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-slate-800/80 text-[11px] space-y-2 font-mono text-slate-300">
               <p className="text-[10px] text-slate-400 font-sans">
-                Para produção em seu Next.js 14 App Router, adicione ao seu <code className="text-cyan-400">.env.local</code>:
+                Variáveis configuradas em <code className="text-cyan-400">.env.local</code>:
               </p>
-              <pre className="p-2 rounded bg-[#060911] border border-slate-800 text-[10px] overflow-x-auto text-violet-300">
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...&#10;CLERK_SECRET_KEY=sk_test_...&#10;NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in&#10;NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+              <pre className="p-2 rounded bg-[#060911] border border-slate-800 text-[9.5px] overflow-x-auto text-violet-300 leading-relaxed">
+AUTH_SECRET=sua_chave_secreta_jwt&#10;AUTH_GOOGLE_ID=google_client_id&#10;AUTH_GOOGLE_SECRET=google_client_secret&#10;AUTH_MICROSOFT_ENTRA_ID_ID=ms_client_id&#10;AUTH_MICROSOFT_ENTRA_ID_SECRET=ms_client_secret&#10;AUTH_MICROSOFT_ENTRA_ID_TENANT_ID=common
               </pre>
             </div>
           )}
